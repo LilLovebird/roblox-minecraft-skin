@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Minecraft Skin</title>
+    <style>
+        * {
+            background-color: #303030;
+            color: lightgray;
+        }
+    </style>
+</head>
+<body>
+    <p>Upload a skin (skin from username cannot be implemented due to CORS) and press copy. Paste into the Roblox Studio command bar (Script > Command in toolbar) and do CTRL+ENTER. Skin must be 64x64 pixels, Alex/slim model not currently supported.</p>
+    <canvas id="canvas" width="64" height="64" style="width: 256px; height: 256px; image-rendering: pixelated;"></canvas>
+    <input type="file" id="fileInput" accept="image/png" />
+    <p>Output: <button onclick="navigator.clipboard.writeText(document.getElementById('code').innerHTML); alert('Copied');">📋Copy</button></p>
+    <code id="code"></code>
+</body>
+<script>
+    const image = new Image(64, 64);
+    const reader = new FileReader();
+    const fileInput = document.getElementById("fileInput");
+    const canvas = document.getElementById("canvas").getContext("2d");
+    const code = document.getElementById("code");
+
+    const coords = new Map([
+        ["Head", new Map([
+            ["Back", [24, 8, 8, 8]],
+            ["Bottom", [16, 0, 8, 8]],
+            ["Front", [8, 8, 8, 8]],
+            ["Left", [16, 8, 8, 8]],
+            ["Right", [0, 8, 8, 8]],
+            ["Top", [8, 0, 8, 8]]
+        ])],
+        ["RightArm", new Map([
+            ["Back", [52, 20, 4, 12]],
+            ["Bottom", [48, 16, 4, 4]],
+            ["Front", [44, 20, 4, 12]],
+            ["Left", [48, 20, 4, 12]],
+            ["Right", [40, 20, 4, 12]],
+            ["Top", [44, 16, 4, 4]]
+        ])],
+        ["Torso", new Map([
+            ["Back", [32, 20, 8, 12]],
+            ["Bottom", [28, 16, 8, 4]],
+            ["Front", [20, 20, 8, 12]],
+            ["Left", [28, 20, 4, 12]],
+            ["Right", [16, 20, 4, 12]],
+            ["Top", [20, 16, 8, 4]]
+        ])],
+        ["LeftArm", new Map([
+            ["Back", [44, 52, 4, 12]],
+            ["Bottom", [40, 48, 4, 4]],
+            ["Front", [36, 52, 4, 12]],
+            ["Left", [40, 52, 4, 12]],
+            ["Right", [32, 52, 4, 12]],
+            ["Top", [36, 48, 4, 4]]
+        ])],
+        ["RightLeg", new Map([
+            ["Back", [12, 20, 4, 12]],
+            ["Bottom", [8, 16, 4, 4]],
+            ["Front", [4, 20, 4, 12]],
+            ["Left", [8, 20, 4, 12]],
+            ["Right", [0, 20, 4, 12]],
+            ["Top", [4, 16, 4, 4]]
+        ])],
+        ["LeftLeg", new Map([
+            ["Back", [28, 52, 4, 12]],
+            ["Bottom", [24, 48, 4, 4]],
+            ["Front", [20, 52, 4, 12]],
+            ["Left", [24, 52, 4, 12]],
+            ["Right", [16, 52, 4, 12]],
+            ["Top", [20, 48, 4, 4]]
+        ])]
+    ]);
+    
+    let script = `
+    local canvasSizes = {
+        ["Head"] = {
+            ["Back"] = Vector2.new(8,8),
+            ["Bottom"] = Vector2.new(8,8),
+            ["Front"] = Vector2.new(8,8),
+            ["Left"] = Vector2.new(8,8),
+            ["Right"] = Vector2.new(8,8),
+            ["Top"] = Vector2.new(8,8)
+        },
+        ["RightArm"] = {
+            ["Back"] = Vector2.new(4,12),
+            ["Bottom"] = Vector2.new(4,4),
+            ["Front"] = Vector2.new(4,12),
+            ["Left"] = Vector2.new(4,12),
+            ["Right"] = Vector2.new(4,12),
+            ["Top"] = Vector2.new(4,4)
+        },
+        ["Torso"] = {
+            ["Back"] = Vector2.new(8,12),
+            ["Bottom"] = Vector2.new(8,4),
+            ["Front"] = Vector2.new(8,12),
+            ["Left"] = Vector2.new(4,12),
+            ["Right"] = Vector2.new(4,12),
+            ["Top"] = Vector2.new(8,4)
+        },
+        ["LeftArm"] = {
+            ["Back"] = Vector2.new(4,12),
+            ["Bottom"] = Vector2.new(4,4),
+            ["Front"] = Vector2.new(4,12),
+            ["Left"] = Vector2.new(4,12),
+            ["Right"] = Vector2.new(4,12),
+            ["Top"] = Vector2.new(4,4)
+        },
+        ["RightLeg"] = {
+            ["Back"] = Vector2.new(4,12),
+            ["Bottom"] = Vector2.new(4,4),
+            ["Front"] = Vector2.new(4,12),
+            ["Left"] = Vector2.new(4,12),
+            ["Right"] = Vector2.new(4,12),
+            ["Top"] = Vector2.new(4,4)
+        },
+        ["LeftLeg"] = {
+            ["Back"] = Vector2.new(4,12),
+            ["Bottom"] = Vector2.new(4,4),
+            ["Front"] = Vector2.new(4,12),
+            ["Left"] = Vector2.new(4,12),
+            ["Right"] = Vector2.new(4,12),
+            ["Top"] = Vector2.new(4,4)
+        }
+    }
+    local model = Instance.new("Model", workspace)
+    local head = Instance.new("Part", model)
+    head.Name = "Head"
+    head.Size = Vector3.new(2, 2, 2)
+    head.Position = Vector3.new(0, 2.5, 0)
+    local rightArm = Instance.new("Part", model)
+    rightArm.Name = "RightArm"
+    rightArm.Size = Vector3.new(1, 3, 1)
+    rightArm.Position = Vector3.new(1.5, 0, 0)
+    local torso = Instance.new("Part", model)
+    torso.Name = "Torso"
+    torso.Size = Vector3.new(2, 3, 1)
+    torso.Position = Vector3.new(0, 0, 0)
+    local leftArm = Instance.new("Part", model)
+    leftArm.Name = "LeftArm"
+    leftArm.Size = Vector3.new(1, 3, 1)
+    leftArm.Position = Vector3.new(-1.5, 0, 0)
+    local rightLeg = Instance.new("Part", model)
+    rightLeg.Name = "RightLeg"
+    rightLeg.Size = Vector3.new(1, 3, 1)
+    rightLeg.Position = Vector3.new(0.5, -3, 0)
+    local leftLeg = Instance.new("Part", model)
+    leftLeg.Name = "LeftLeg"
+    leftLeg.Size = Vector3.new(1, 3, 1)
+    leftLeg.Position = Vector3.new(-0.5, -3, 0)
+    for _, part in pairs(model:GetChildren()) do
+        part.Anchored = true
+        part.Transparency = 1
+        for _, face in Enum.NormalId:GetEnumItems() do
+            local surfaceGui = Instance.new("SurfaceGui", part)
+            surfaceGui.Face = face
+            surfaceGui.Name = face.Name
+            local size = canvasSizes[part.Name][face.Name]
+            surfaceGui.CanvasSize = size
+            surfaceGui.LightInfluence = 1
+            local frame = Instance.new("Frame", surfaceGui)
+            frame.BackgroundTransparency = 1
+            frame.BorderSizePixel = 0
+            frame.Size = UDim2.new(1, 0, 1, 0)
+            if face.Name == "Top" or face.Name == "Bottom" then
+                frame.Rotation = -90
+            end
+            local uiGridLayout = Instance.new("UIGridLayout", frame)
+            uiGridLayout.CellPadding = UDim2.new(0, 0, 0, 0)
+            uiGridLayout.CellSize = UDim2.new(1/size.X, 0, 1/size.Y, 0)
+            for count = 1, size.X * size.Y do
+                local pixel = Instance.new("Frame", frame)
+                pixel.BorderSizePixel = 0
+                pixel.Name = string.format("%02i", count)
+                pixel.BackgroundColor3 = colors[part.Name][face.Name][count]
+            end
+        end
+    end
+    model:MoveTo(Vector3.new(0, 4, 0))
+    `;
+
+    fileInput.addEventListener("change", () => {
+        const file = fileInput.files[0];
+        reader.readAsDataURL(file);
+    });
+
+    reader.onload = (e) => {
+        canvas.reset();
+        image.src = e.target.result;
+    };
+
+    image.onload = () => {
+        canvas.drawImage(image, 0, 0, 64, 64, 0, 0, 64, 64);
+        let colors = "local colors = {";
+        coords.keys().forEach(part => {
+            colors += '["'+part+'"]={'
+            coords.get(part).keys().forEach(face => {
+                colors += '["'+face+'"]={'
+                const value = coords.get(part).get(face);
+                let imageData = canvas.getImageData(value[0], value[1], value[2], value[3]).data;
+                imageData = imageData.filter(function(_, i) {
+                    return (i + 1) % 4;
+                });
+                for (let i = 0; i < imageData.length; i += 3) {
+                    const chunk = imageData.slice(i, i + 3);
+                    colors += "Color3.fromRGB("+chunk.toString()+"),";
+                }
+                colors += '},'
+            });
+            colors += '},'
+        });
+        colors += '}'
+        code.textContent = colors += script;
+    }
+</script>
+</html>
