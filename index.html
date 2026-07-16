@@ -12,7 +12,7 @@
     </style>
 </head>
 <body>
-    <p>Upload a skin (skin from username cannot be implemented due to CORS) and press copy. Paste into the Roblox Studio command bar (Script > Command in toolbar) and do CTRL+ENTER. Skin must be 64x64 pixels, Alex/slim model not currently supported.</p>
+    <p>Loads Minecraft skin models into Roblox Studio. Upload a skin (skin from username cannot be implemented due to CORS) and press copy. Paste into the Roblox Studio command bar (Script > Command in toolbar) and do CTRL+ENTER. Skin must be 64x64 pixels, Alex/slim model not currently supported.</p>
     <canvas id="canvas" width="64" height="64" style="width: 256px; height: 256px; image-rendering: pixelated;"></canvas>
     <input type="file" id="fileInput" accept="image/png" />
     <p>Output: <button onclick="navigator.clipboard.writeText(document.getElementById('code').innerHTML); alert('Copied');">📋Copy</button></p>
